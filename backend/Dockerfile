@@ -1,5 +1,9 @@
+# ARGs used in FROM instructions must be declared before the first FROM (global scope)
 # BUILD_BASE: oven/bun:1-alpine for amd64/arm64, node:20-alpine for armv7 (Bun has no arm32 image)
+# RUNTIME_BASE: node:22-alpine for amd64/arm64, node:20-alpine for armv7 (Node 22 dropped arm/v7)
 ARG BUILD_BASE=oven/bun:1-alpine
+ARG RUNTIME_BASE=node:22-alpine
+
 FROM ${BUILD_BASE} AS base
 
 # Dependencies stage
@@ -48,8 +52,6 @@ RUN if command -v bun >/dev/null 2>&1; then \
       npm run build; \
     fi
 
-# RUNTIME_BASE: node:22-alpine for amd64/arm64, node:20-alpine for armv7 (Node 22 dropped arm/v7)
-ARG RUNTIME_BASE=node:22-alpine
 FROM ${RUNTIME_BASE} AS runner
 WORKDIR /app
 
