@@ -67,6 +67,7 @@ nginx-proxy/conf.d/*
 !nginx-proxy/conf.d/.gitkeep
 !nginx-proxy/conf.d/default.conf
 
-.claude/
+.claude/*
+!.claude/commands
 AGENTS.md
 CODEBASE_SUMMARY.md
