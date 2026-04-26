@@ -1,3 +1,11 @@
+## [1.3.18](https://github.com/ixiDev/docklift/compare/v1.3.17...v1.3.18) (2026-04-26)
+
+
+### Features
+
+* **arm:** add Odroid XU4 (ARMv7/armhf) support ([d01cf6c](https://github.com/ixiDev/docklift/commit/d01cf6c))
+
+
 ## [1.3.17](https://github.com/SSujitX/docklift/compare/v1.3.16...v1.3.17) (2026-02-17)
 
 
