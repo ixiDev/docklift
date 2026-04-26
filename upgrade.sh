@@ -67,7 +67,8 @@ FETCH_ST=$(date +%s)
 printf "  ${CYAN}[2/5]${NC} Fetching latest release..."
 {
     # Get latest release tag from GitHub API
-    LATEST_TAG=$(curl -s https://api.github.com/repos/SSujitX/docklift/releases/latest | grep '"tag_name"' | cut -d'"' -f4 || echo "")
+    LATEST_TAG=$(curl -s https://api.github.com/repos/ixiDev/docklift/releases/latest | grep '"tag_name"' | cut -d'"' -f4 || echo "")
+    git remote set-url origin https://github.com/ixiDev/docklift.git
     git fetch origin --tags -q
     if [ -n "$LATEST_TAG" ]; then
         git checkout "$LATEST_TAG" -q 2>/dev/null || git checkout "tags/$LATEST_TAG" -q
