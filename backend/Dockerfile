@@ -5,6 +5,9 @@ ARG BUILD_BASE=oven/bun:1-alpine
 ARG RUNTIME_BASE=node:22-alpine
 
 FROM ${BUILD_BASE} AS base
+# Prisma does not publish .sha256 checksums for the linux-arm engine; skip the check.
+# The actual engine binary at linux-arm-openssl-3.0.x DOES exist and runs on Alpine via libc6-compat.
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
 # Dependencies stage
 FROM base AS deps
@@ -57,6 +60,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=8000
+# Prisma does not publish .sha256 checksums for the linux-arm engine; skip the check at runtime too.
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 
 # Install Docker CLI, Git, and procps (for accurate ps/top)
 RUN apk add --no-cache docker-cli docker-cli-compose git procps bash util-linux
