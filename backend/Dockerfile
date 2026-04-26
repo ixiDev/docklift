@@ -1,23 +1,40 @@
-# Base stage - Use Bun for faster installs
-FROM oven/bun:1-alpine AS base
+# BUILD_BASE: oven/bun:1-alpine for amd64/arm64, node:20-alpine for armv7 (Bun has no arm32 image)
+ARG BUILD_BASE=oven/bun:1-alpine
+FROM ${BUILD_BASE} AS base
 
 # Dependencies stage
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json bun.lock* ./
+COPY package.json bun.lock* package-lock.json* ./
 COPY prisma ./prisma/
-RUN bun install --frozen-lockfile
-RUN bunx prisma generate --no-hints
+RUN if command -v bun >/dev/null 2>&1; then \
+      bun install --frozen-lockfile; \
+    else \
+      npm install; \
+    fi
+RUN if command -v bun >/dev/null 2>&1; then \
+      bunx prisma generate --no-hints; \
+    else \
+      npx prisma generate --no-hints; \
+    fi
 
 # Production dependencies stage
 FROM base AS prod-deps
 WORKDIR /app
-COPY package.json bun.lock* ./
+COPY package.json bun.lock* package-lock.json* ./
 COPY prisma ./prisma/
-RUN bun install --production --frozen-lockfile
-RUN bunx prisma generate --no-hints
+RUN if command -v bun >/dev/null 2>&1; then \
+      bun install --production --frozen-lockfile; \
+    else \
+      npm install --omit=dev; \
+    fi
+RUN if command -v bun >/dev/null 2>&1; then \
+      bunx prisma generate --no-hints; \
+    else \
+      npx prisma generate --no-hints; \
+    fi
 
 # Builder stage
 FROM base AS builder
@@ -25,10 +42,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN bun run build
+RUN if command -v bun >/dev/null 2>&1; then \
+      bun run build; \
+    else \
+      npm run build; \
+    fi
 
-# Runner stage - Use Node for production runtime
-FROM node:22-alpine AS runner
+# RUNTIME_BASE: node:22-alpine for amd64/arm64, node:20-alpine for armv7 (Node 22 dropped arm/v7)
+ARG RUNTIME_BASE=node:22-alpine
+FROM ${RUNTIME_BASE} AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

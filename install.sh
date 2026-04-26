@@ -20,6 +20,15 @@ echo -e "  ${DIM}Self-Hosted Docker Deployment Platform${NC}\n"
 [ "$EUID" -ne 0 ] && echo -e "  ${RED}Error: Run with sudo${NC}" && exit 1
 echo -e "  ${BOLD}Starting Installation${NC}\n"
 
+# Architecture detection: ARMv7 (Odroid XU4, RPi 2/3 32-bit, etc.)
+# Bun has no armv7 image; Node.js 22 dropped armv7 — use Node.js 20 as fallback
+ARCH=$(uname -m)
+if [ "$ARCH" = "armv7l" ]; then
+    echo -e "  ${CYAN}Detected ARMv7 architecture${NC} ${DIM}(using Node.js 20 fallback images)${NC}\n"
+    export DOCKLIFT_BUILD_BASE="node:20-alpine"
+    export DOCKLIFT_RUNTIME_BASE="node:20-alpine"
+fi
+
 # Step 1: Requirements
 printf "  ${CYAN}[1/5]${NC} Checking requirements..."
 for cmd in docker git; do
