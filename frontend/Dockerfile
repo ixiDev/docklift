@@ -1,13 +1,20 @@
-# Install dependencies with Bun (fast)
-FROM oven/bun:1-alpine AS deps
+# BUILD_BASE: oven/bun:1-alpine for amd64/arm64, node:20-alpine for armv7 (Bun has no arm32 image)
+ARG BUILD_BASE=oven/bun:1-alpine
+FROM ${BUILD_BASE} AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
+COPY package.json bun.lock* package-lock.json* ./
+RUN if command -v bun >/dev/null 2>&1; then \
+      bun install --frozen-lockfile; \
+    else \
+      npm install; \
+    fi
 
 # Build with Node.js (stable — Bun crashes with SIGILL on some server CPUs)
-FROM node:22-alpine AS builder
+# RUNTIME_BASE: node:22-alpine for amd64/arm64, node:20-alpine for armv7 (Node 22 dropped arm/v7)
+ARG RUNTIME_BASE=node:22-alpine
+FROM ${RUNTIME_BASE} AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -20,7 +27,8 @@ RUN mkdir -p public
 RUN npm run build
 
 # Production runtime
-FROM node:22-alpine AS runner
+ARG RUNTIME_BASE=node:22-alpine
+FROM ${RUNTIME_BASE} AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

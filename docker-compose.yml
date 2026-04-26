@@ -1,6 +1,10 @@
 services:
   docklift-backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        - BUILD_BASE=${DOCKLIFT_BUILD_BASE:-oven/bun:1-alpine}
+        - RUNTIME_BASE=${DOCKLIFT_RUNTIME_BASE:-node:22-alpine}
     container_name: docklift-backend
     hostname: docklift
     restart: unless-stopped
@@ -38,6 +42,8 @@ services:
     build:
       context: ./frontend
       args:
+        - BUILD_BASE=${DOCKLIFT_BUILD_BASE:-oven/bun:1-alpine}
+        - RUNTIME_BASE=${DOCKLIFT_RUNTIME_BASE:-node:22-alpine}
         - NEXT_PUBLIC_API_URL=http://localhost:8000
     container_name: docklift-frontend
     restart: unless-stopped
