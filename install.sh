@@ -45,12 +45,13 @@ FETCH_ST=$(date +%s)
 printf "  ${CYAN}[2/5]${NC} Fetching code..."
 {
     # Get latest release tag from GitHub API
-    LATEST_TAG=$(curl -s https://api.github.com/repos/SSujitX/docklift/releases/latest | grep '"tag_name"' | cut -d'"' -f4 || echo "")
+    LATEST_TAG=$(curl -s https://api.github.com/repos/ixiDev/docklift/releases/latest | grep '"tag_name"' | cut -d'"' -f4 || echo "")
 
     if [ "$DOCKLIFT_CI_LOCAL" = "true" ]; then
         mkdir -p "$INSTALL_DIR" && cp -r . "$INSTALL_DIR/" && cd "$INSTALL_DIR"
     elif [ -d "$INSTALL_DIR/.git" ]; then
         cd "$INSTALL_DIR" && docker compose down 2>/dev/null || true
+        git remote set-url origin https://github.com/ixiDev/docklift.git
         git fetch origin --tags -q
         if [ -n "$LATEST_TAG" ]; then
             git checkout "$LATEST_TAG" -q 2>/dev/null || git checkout "tags/$LATEST_TAG" -q
@@ -58,7 +59,7 @@ printf "  ${CYAN}[2/5]${NC} Fetching code..."
             git fetch origin master -q && git reset --hard origin/master -q
         fi
     else
-        git clone -q https://github.com/SSujitX/docklift.git "$INSTALL_DIR" && cd "$INSTALL_DIR"
+        git clone -q https://github.com/ixiDev/docklift.git "$INSTALL_DIR" && cd "$INSTALL_DIR"
         if [ -n "$LATEST_TAG" ]; then
             git checkout "$LATEST_TAG" -q 2>/dev/null || git checkout "tags/$LATEST_TAG" -q
         fi
